@@ -38,16 +38,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 const void MainWindow::initLcdDisplay(){
+    this->lcdDisplays.append(this->ui->lcdNumber_1);
+    this->lcdDisplays.append(this->ui->lcdNumber_2);
+    this->lcdDisplays.append(this->ui->lcdNumber_3);
+    this->lcdDisplays.append(this->ui->lcdNumber_4);
+    this->lcdDisplays.append(this->ui->lcdNumber_5);
     for(int i=0;i<MAX_RANGDOM_COUNT;i++){
-        QLCDNumber *lcdnum = new QLCDNumber(this);
-        lcdnum->setDigitCount(11);
-        lcdnum->hide();
-        ui->verticalLayout->addWidget(lcdnum);
-        this->lcdDisplays.append(lcdnum);
+//        this->lcdDisplays.at(i)->setDigitCount(11);
+        this->lcdDisplays.at(i)->hide();
     }
-    for(int i=0;i<this->count;i++){
-        this->lcdDisplays.at(i)->show();
-    }
+    this->ui->lcdNumber_1->show();
+
 }
 
 const void MainWindow::reset(){
@@ -66,6 +67,7 @@ bool MainWindow::trigger()
         this->isStarted = true;
         ui->pushButton->setText("停止");
     }
+    return true;
 }
 
 void MainWindow::timeUpdate(){
@@ -75,13 +77,11 @@ void MainWindow::timeUpdate(){
         int randNum=0;
         int randSum = this->phoneList.size();
         QString temp;
-        QLCDNumber *lcdNum;
         for(int i=0;i<this->count;i++){
             randNum =qrand()%(randSum -i);
             temp = this->phoneList.takeAt(randNum);
-            lcdNum = this->lcdDisplays.at(i);
             double res = temp.toLong();
-            lcdNum->display(res);
+            this->lcdDisplays.at(i)->display(res);
             this->result.append(temp);
         }
 //        this->index = qrand()%this->phoneList.count();
