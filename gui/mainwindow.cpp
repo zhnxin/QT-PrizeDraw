@@ -7,8 +7,6 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include<QVBoxLayout>
-
-
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -16,8 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->lcdNumber->setDigitCount(11);
     this->reset();
+    this->initLcdDisplay();
 //    std::cout<<this->phoneList.size()<<"create"<<endl;
     this->confDlg = new QDialog(this);
     this->confDlg->setToolTip(tr("设置随机数量"));
@@ -39,6 +37,19 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+const void MainWindow::initLcdDisplay(){
+    for(int i=0;i<MAX_RANGDOM_COUNT;i++){
+        QLCDNumber *lcdnum = new QLCDNumber(this);
+        lcdnum->setDigitCount(11);
+        lcdnum->hide();
+        ui->verticalLayout->addWidget(lcdnum);
+        this->lcdDisplays.append(lcdnum);
+    }
+    for(int i=0;i<this->count;i++){
+        this->lcdDisplays.at(i)->show();
+    }
+}
+
 const void MainWindow::reset(){
     this->isStarted=false;
     this->phoneList.clear();
@@ -59,17 +70,23 @@ bool MainWindow::trigger()
 
 void MainWindow::timeUpdate(){
     if(this->isStarted && !this->phoneList.isEmpty()){
-//        this->phoneList.append(this->result);
-//        this->result.clear();
-//        int randNum=0;
-//        int randSum = this->phoneList.size();
-//        for(int i=0;i<this->count;i++){
-//            randNum =qrand()%(randSum -i);
-//            this->result.append(this->phoneList.takeAt(randNum));
-//        }
-        this->index = qrand()%this->phoneList.count();
-        double res= this->phoneList.at(this->index).toLong();
-        ui->lcdNumber->display(res);
+        this->phoneList.append(this->result);
+        this->result.clear();
+        int randNum=0;
+        int randSum = this->phoneList.size();
+        QString temp;
+        QLCDNumber *lcdNum;
+        for(int i=0;i<this->count;i++){
+            randNum =qrand()%(randSum -i);
+            temp = this->phoneList.takeAt(randNum);
+            lcdNum = this->lcdDisplays.at(i);
+            double res = temp.toLong();
+            lcdNum->display(res);
+            this->result.append(temp);
+        }
+//        this->index = qrand()%this->phoneList.count();
+//        double res= this->phoneList.at(this->index).toLong();
+//        ui->lcdNumber->display(res);
     }
 }
 
@@ -98,8 +115,6 @@ bool MainWindow::loadFile(const QString &fileName){
 
 void MainWindow::openFile()
 {
-    this->isStarted=false;
-    ui->pushButton->setText(tr("开始"));
     QString fileName = QFileDialog::getOpenFileName(this, tr("Excel file"), qApp->applicationDirPath (),
                                                     tr("Files (*.csv)"));
     if (!fileName.isEmpty()){
@@ -109,6 +124,8 @@ void MainWindow::openFile()
 
 void MainWindow::on_action_F_triggered()
 {
+    this->isStarted=false;
+    ui->pushButton->setText(tr("开始"));
     this->openFile();
 }
 
@@ -143,15 +160,25 @@ void MainWindow::on_action_W_triggered()
 
 void MainWindow::on_action_triggered()
 {
+    this->isStarted=false;
     this->confDlg->show();
 }
 
 void MainWindow::setRandSelectedNum()
 {
-    this->confDlg->close();
     bool ok=true;
     int temp = this->confBox->text().toInt(&ok,10);
     if(ok){
+        if(this->count>temp){
+            for(int i=5;i>temp;i--){
+                this->lcdDisplays.at(i-1)->hide();
+            }
+        }else{
+            for(int i=this->count-1;i<temp;i++){
+                this->lcdDisplays.at(i)->show();
+            }
+        }
         this->count = temp;
+        this->confDlg->close();
     }
 }

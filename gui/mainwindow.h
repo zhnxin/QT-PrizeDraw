@@ -3,6 +3,10 @@
 
 #include <QMainWindow>
 #include<QSpinBox>
+#include<QLCDNumber>
+#include<QGridLayout>
+
+#define MAX_RANGDOM_COUNT 5
 
 namespace Ui {
 class MainWindow;
@@ -33,7 +37,7 @@ private:
     QDialog *confDlg;
     QSpinBox *confBox;
 
-
+    QList<QLCDNumber *> lcdDisplays;
     QList<QString> phoneList;
     QString curlFile;
     QList<QString> result;
@@ -43,6 +47,7 @@ private:
     bool loadFile(const QString &fileName);
     void openFile();
     const void reset();
+    const void initLcdDisplay();
     bool trigger();
 };
 
